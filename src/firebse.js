@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword,getAuth, 
     signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, addDoc, collection } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBTRzgwBJVckwkD0ff6B5noczD6bhD8uqo",
@@ -18,33 +19,36 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const signup = async (name,email,password) =>{
-    try{
-        await createUserWithEmailAndPassword(auth, email, password)
+const signup = async (name, email, password) => {
+    try {
+        const res = await createUserWithEmailAndPassword(auth, email, password);
         const user = res.user;
-        await addDoc(collection(db,"users"), {
+        
+        await addDoc(collection(db, "users"), {
             uid: user.uid,
             name: name,
             authProvider: "local",
-            email: email})
-    }catch(err){
-        console.log(err)
-        alert(err);
+            email: email
+        });
+
+    } catch (err) {
+        console.log(err);
+        toast.error(err.code.split('/')[1].split('-').join(' ')); 
     }
-}
+};
 
 const login = async (email,password) => {
     try{
         await signInWithEmailAndPassword(auth, email, password)
     }catch(err){
         console.log(err)
-        alert(err);
+        toast.error(err.code.split('/')[1].split('-').join(' '));
     }
 }
 
-const logout = () => {
-    signOut(auth)
-}
+const logout = async () => {
+    await signOut(auth);
+};
 
 export { auth, db, signup, login, logout };
 export default app; 
