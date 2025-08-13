@@ -85,6 +85,15 @@
 .login-spinner img{
     width: 60px;
 }
+.input-error {
+  border: 1px solid red;
+}
+.error-text {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
 @media (max-width: 500px) {
     .login{
         padding: 15px 5%;
