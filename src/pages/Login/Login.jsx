@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // import navigation
+import { onAuthStateChanged } from 'firebase/auth'; // import session listener
+import { auth, signup, login } from '../../firebse'; // make sure auth is exported in firebse.js
 import './login.css';
 import logo from '../../assets/logo.png';
-import { signup, login } from '../../firebse';
 import netflix_spinner from '../../assets/netflix_spinner.gif';
 
 const Login = () => {
@@ -11,22 +13,29 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  // ✅ Session handling
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/"); // redirect if logged in
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   const validate = () => {
     const newErrors = {};
-
     if (signState === 'Sign Up' && !name.trim()) newErrors.name = 'Name is required';
     if (!email.trim()) newErrors.email = 'Email is required';
     if (!password.trim()) newErrors.password = 'Password is required';
-
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
   const user_auth = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     setLoading(true);
@@ -36,6 +45,7 @@ const Login = () => {
       } else {
         await signup(name, email, password);
       }
+      // ✅ navigation will automatically happen via onAuthStateChanged
     } catch (err) {
       console.error(err);
     } finally {
